@@ -503,11 +503,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc46b71935d76bf418ef40ca6b9331c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  useMainCamera: 1
-  m_camera: {fileID: 0}
-  terrainLayerMask:
-    serializedVersion: 2
-    m_Bits: 55
   selector: {fileID: 0}
 --- !u!1001 &472286983
 PrefabInstance:
@@ -1069,7 +1064,7 @@ PrefabInstance:
     - target: {fileID: 5680633760941013273, guid: 9212171a8d04c5943a9235a8a5ec6fb0,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 499.47
+      value: 497.62
       objectReference: {fileID: 0}
     - target: {fileID: 5680633760941013273, guid: 9212171a8d04c5943a9235a8a5ec6fb0,
         type: 3}
@@ -1079,7 +1074,7 @@ PrefabInstance:
     - target: {fileID: 5680633760941013273, guid: 9212171a8d04c5943a9235a8a5ec6fb0,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 498.53998
+      value: 496.72
       objectReference: {fileID: 0}
     - target: {fileID: 5680633760941013273, guid: 9212171a8d04c5943a9235a8a5ec6fb0,
         type: 3}

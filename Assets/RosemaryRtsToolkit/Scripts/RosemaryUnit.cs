@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Security.Cryptography;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -10,9 +9,26 @@ namespace Cresspresso
 	{
 		public class RosemaryUnit : MonoBehaviour
 		{
-			public Vector3 destination;
-			public float speed = 10;
-			public float angularSpeed = 90;
+			[SerializeField]
+			private float m_speed = 5.0f;
+			public float speed {
+				get => m_speed;
+				set => m_speed = value;
+			}
+
+			[SerializeField]
+			private float m_maxSeekRange = 5.0f;
+			public float maxSeekRange {
+				get => m_maxSeekRange;
+				set => m_maxSeekRange = value;
+			}
+
+			[SerializeField]
+			private float m_minSeekRange = 2.0f;
+			public float minSeekRange {
+				get => m_minSeekRange;
+				set => m_minSeekRange = value;
+			}
 
 			[SerializeField]
 			private UnityEvent m_onSelected = new UnityEvent();
@@ -22,7 +38,36 @@ namespace Cresspresso
 			private UnityEvent m_onDeselected = new UnityEvent();
 			public UnityEvent onDeselected => m_onDeselected;
 
-			private Quaternion orientation;
+
+
+			[Header("Runtime")]
+
+			[SerializeField]
+			private Vector3 m_destination;
+			public Vector3 destination {
+				get => m_destination;
+				set => m_destination = value;
+			}
+			
+			[SerializeField]
+			private RosemaryUnit m_enemyTarget = null;
+			public RosemaryUnit enemyTarget {
+				get => m_enemyTarget;
+				set
+				{
+					m_enemyTarget = value;
+
+					if (m_enemyTarget)
+					{
+						foreach (var motor in GetComponentsInChildren<RosemaryTurretMotor>())
+						{
+							motor.SetTarget(m_enemyTarget.transform);
+						}
+					}
+				}
+			}
+
+
 
 			private void Awake()
 			{
@@ -30,18 +75,30 @@ namespace Cresspresso
 				destination = transform.position;
 			}
 
-			private void FixedUpdate()
+			private void Move()
 			{
 				transform.position = Vector3.MoveTowards(transform.position, destination, speed * Time.fixedDeltaTime);
+			}
 
-				var displacement = destination - transform.position;
-				if (displacement.sqrMagnitude > 0.001f)
+			private void FixedUpdate()
+			{
+				var rootMotor = GetComponent<RosemaryTurretMotor>();
+				rootMotor.SetTarget(Vector3.Distance(transform.position, destination) < 0.001f
+					? 1000 * rootMotor.transform.forward
+					: destination);
+
+				if (enemyTarget)
 				{
-					var up = transform.parent ? transform.parent.up : Vector3.up;
-					orientation = Quaternion.LookRotation(displacement, up);
+					var enemyPosition = enemyTarget.transform.position;
+					var fromEnemyToThis = transform.position - enemyPosition;
+					var s = Mathf.Clamp(fromEnemyToThis.magnitude, minSeekRange, maxSeekRange);
+					destination = enemyPosition + fromEnemyToThis.normalized * s;
+					Move();
 				}
-
-				transform.rotation = Quaternion.RotateTowards(transform.rotation, orientation, angularSpeed * Time.fixedDeltaTime);
+				else
+				{
+					Move();
+				}
 			}
 
 			public void OnSelected()
@@ -52,6 +109,17 @@ namespace Cresspresso
 			public void OnDeselected()
 			{
 				m_onDeselected.Invoke();
+			}
+
+			public void CommandMove(Vector3 destination)
+			{
+				this.destination = destination;
+				this.enemyTarget = null;
+			}
+
+			public void CommandAttack(RosemaryUnit otherUnit)
+			{
+				this.enemyTarget = otherUnit;
 			}
 		}
 	}

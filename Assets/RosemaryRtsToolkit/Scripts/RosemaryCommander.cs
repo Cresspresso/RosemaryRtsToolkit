@@ -17,21 +17,6 @@ namespace Cresspresso
 		public class RosemaryCommander : MonoBehaviour
 		{
 			public IRosemaryCommanderInputProvider inputProvider;
-
-			public bool useMainCamera = true;
-			[SerializeField]
-			private Camera m_camera;
-			public Camera cam {
-				get => useMainCamera ? Camera.main : m_camera;
-				set
-				{
-					m_camera = value;
-					useMainCamera = !(bool)m_camera;
-				}
-			}
-
-			public LayerMask terrainLayerMask = ~0;
-
 			public RosemarySelector selector;
 
 			private void Awake()
@@ -46,25 +31,52 @@ namespace Cresspresso
 				}
 			}
 
+			private void RaycastCommand()
+			{
+				var pointerPosition = inputProvider.GetPointerPositionInScreenSpace();
+				var ray = selector.cam.ScreenPointToRay(pointerPosition);
+				RaycastHit hit;
+				if (Physics.Raycast(
+					ray,
+					out hit,
+					Mathf.Infinity,
+					selector.unitLayerMask,
+					QueryTriggerInteraction.Ignore))
+				{
+					var otherUnit = hit.collider.GetComponentInParent<RosemaryUnit>();
+					if (otherUnit)
+					{
+						foreach (var unit in selector.selectedUnits)
+						{
+							unit.CommandAttack(otherUnit);
+						}
+						return;
+					}
+				}
+
+				if (Physics.Raycast(
+					selector.cam.ScreenPointToRay(inputProvider.GetPointerPositionInScreenSpace()),
+					out hit,
+					Mathf.Infinity,
+					selector.terrainLayerMask,
+					QueryTriggerInteraction.Ignore))
+				{
+					var destination = hit.point;
+					foreach (var unit in selector.selectedUnits)
+					{
+						unit.CommandMove(destination);
+					}
+					return;
+				}
+			}
+
 			private void Update()
 			{
 				if (inputProvider != null)
 				{
 					if (inputProvider.DidButtonGoDown())
 					{
-						if (Physics.Raycast(
-							cam.ScreenPointToRay(inputProvider.GetPointerPositionInScreenSpace()),
-							out RaycastHit hit,
-							Mathf.Infinity,
-							terrainLayerMask,
-							QueryTriggerInteraction.Ignore))
-						{
-							var destination = hit.point;
-							foreach (var unit in selector.selectedUnits)
-							{
-								unit.destination = destination;
-							}
-						}
+						RaycastCommand();
 					}
 				}
 			}
