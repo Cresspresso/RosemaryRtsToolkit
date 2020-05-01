@@ -8,21 +8,41 @@ namespace Cresspresso
 {
 	namespace Rosemary
 	{
-		public class RosemaryPlayerFaction : MonoBehaviour
+		public interface IRosemarySelectorInputProvider
 		{
+			bool DidButtonGoDown();
+			bool DidButtonGoUp();
+			Vector2 GetPointerPositionInScreenSpace();
+		}
+
+		public class RosemarySelector : MonoBehaviour
+		{
+			public IRosemarySelectorInputProvider inputProvider;
+
 			public bool useMainCamera = true;
-			public Camera m_camera;
-			public Camera cam => useMainCamera ? Camera.main : m_camera;
+			[SerializeField]
+			private Camera m_camera;
+			public Camera cam {
+				get => useMainCamera ? Camera.main : m_camera;
+				set
+				{
+					m_camera = value;
+					useMainCamera = !(bool)m_camera;
+				}
+			}
 			public LayerMask unitLayerMask = ~0;
 			public LayerMask terrainLayerMask = ~0;
-			public List<RosemaryUnit> selectedUnits = new List<RosemaryUnit>();
+			public Vector2 boxSelectMinSizeInViewport = new Vector2(0.01f, 0.01f);
+			public RectTransform boxSelectRectTransform;
+
+			[SerializeField]
+			private List<RosemaryUnit> m_selectedUnits = new List<RosemaryUnit>();
+			public IReadOnlyList<RosemaryUnit> selectedUnits => m_selectedUnits;
 			private bool isPointerDown = false;
-			public bool isBoxSelecting = false;
+			private bool isBoxSelecting = false;
 			private Vector2 initialPointerPosition;
 			private Vector2 currentPointerPosition;
 			private Rect boxSelectRect;
-			public Vector2 boxSelectMinSizeInViewport = new Vector2(0.01f, 0.01f);
-			public RectTransform boxSelectRectTransform;
 
 			private void Awake()
 			{
@@ -31,18 +51,18 @@ namespace Cresspresso
 				OnBoxSelectRectChanged();
 			}
 
-			private void Clear()
+			private void ClearSelectedUnits()
 			{
 				foreach (var unit in selectedUnits)
 				{
 					unit.OnDeselected();
 				}
-				selectedUnits.Clear();
+				m_selectedUnits.Clear();
 			}
 
-			private void Add(RosemaryUnit unit)
+			private void AddUnitToSelection(RosemaryUnit unit)
 			{
-				selectedUnits.Add(unit);
+				m_selectedUnits.Add(unit);
 				unit.OnSelected();
 			}
 
@@ -55,7 +75,7 @@ namespace Cresspresso
 					var camera = this.cam;
 					if (isBoxSelecting)
 					{
-						Clear();
+						ClearSelectedUnits();
 						// TODO optimise
 						foreach (var unit in
 							from unit in FindObjectsOfType<RosemaryUnit>()
@@ -63,7 +83,7 @@ namespace Cresspresso
 							where screenPosition.z >= 0 && boxSelectRect.Contains(screenPosition)
 							select unit)
 						{
-							Add(unit);
+							AddUnitToSelection(unit);
 						}
 					}
 					else
@@ -71,7 +91,7 @@ namespace Cresspresso
 						// Just a pointer tap therefore Single Select.
 						bool found = false;
 						if (Physics.Raycast(
-							camera.ScreenPointToRay(Input.mousePosition),
+							camera.ScreenPointToRay(inputProvider.GetPointerPositionInScreenSpace()),
 							out RaycastHit hit,
 							Mathf.Infinity,
 							unitLayerMask,
@@ -81,14 +101,14 @@ namespace Cresspresso
 							if (unit)
 							{
 								found = true;
-								Clear();
-								Add(unit);
+								ClearSelectedUnits();
+								AddUnitToSelection(unit);
 								unit.OnSelected();
 							}
 						}
 						if (!found)
 						{
-							Clear();
+							ClearSelectedUnits();
 						}
 					}
 				}
@@ -121,7 +141,10 @@ namespace Cresspresso
 			{
 				if (isPointerDown)
 				{
-					currentPointerPosition = Input.mousePosition;
+					if (inputProvider != null)
+					{
+						currentPointerPosition = inputProvider.GetPointerPositionInScreenSpace();
+					}
 					Vector2 displacement = currentPointerPosition - initialPointerPosition;
 					boxSelectRect = new Rect(
 						x: Mathf.Min(initialPointerPosition.x, currentPointerPosition.x),
@@ -142,35 +165,21 @@ namespace Cresspresso
 					OnBoxSelectRectChanged();
 				}
 
-				if (Input.GetButtonDown("Fire1"))
+				if (inputProvider != null)
 				{
-					isPointerDown = true;
-					isBoxSelecting = false;
-					initialPointerPosition = Input.mousePosition;
-					currentPointerPosition = initialPointerPosition;
-					boxSelectRect = new Rect(initialPointerPosition, Vector2.zero);
-					OnBoxSelectRectChanged();
-				}
-
-				if (Input.GetButtonUp("Fire1"))
-				{
-					OnPointerUp();
-				}
-
-				if (Input.GetButtonDown("Fire2"))
-				{
-					if (Physics.Raycast(
-						cam.ScreenPointToRay(Input.mousePosition),
-						out RaycastHit hit,
-						Mathf.Infinity,
-						terrainLayerMask,
-						QueryTriggerInteraction.Ignore))
+					if (inputProvider.DidButtonGoDown())
 					{
-						var destination = hit.point;
-						foreach (var unit in selectedUnits)
-						{
-							unit.destination = destination;
-						}
+						isPointerDown = true;
+						isBoxSelecting = false;
+						initialPointerPosition = inputProvider.GetPointerPositionInScreenSpace();
+						currentPointerPosition = initialPointerPosition;
+						boxSelectRect = new Rect(initialPointerPosition, Vector2.zero);
+						OnBoxSelectRectChanged();
+					}
+
+					if (inputProvider.DidButtonGoUp())
+					{
+						OnPointerUp();
 					}
 				}
 			}

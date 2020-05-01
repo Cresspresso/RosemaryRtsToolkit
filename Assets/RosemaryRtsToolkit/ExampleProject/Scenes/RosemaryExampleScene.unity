@@ -416,8 +416,11 @@ GameObject:
   m_Component:
   - component: {fileID: 468042561}
   - component: {fileID: 468042560}
+  - component: {fileID: 468042562}
+  - component: {fileID: 468042564}
+  - component: {fileID: 468042563}
   m_Layer: 0
-  m_Name: RosemaryPlayerFaction
+  m_Name: RosemarySelector
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -443,10 +446,9 @@ MonoBehaviour:
   terrainLayerMask:
     serializedVersion: 2
     m_Bits: 4294967295
-  selectedUnits: []
-  isBoxSelecting: 0
   boxSelectMinSizeInViewport: {x: 0.01, y: 0.01}
   boxSelectRectTransform: {fileID: 345568874}
+  m_selectedUnits: []
 --- !u!4 &468042561
 Transform:
   m_ObjectHideFlags: 0
@@ -461,6 +463,52 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &468042562
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 468042559}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89e928e614b64b84e895dc12c0263cd1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inputButtonName: Fire1
+  m_pawn: {fileID: 468042560}
+--- !u!114 &468042563
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 468042559}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 379159ca37276e7458bcd0fa47c471a9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inputButtonName: Fire2
+  m_pawn: {fileID: 468042564}
+--- !u!114 &468042564
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 468042559}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc46b71935d76bf418ef40ca6b9331c4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  useMainCamera: 1
+  m_camera: {fileID: 0}
+  terrainLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  selector: {fileID: 0}
 --- !u!1001 &472286983
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1228,6 +1276,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2027494985}
   - component: {fileID: 2027494988}
+  - component: {fileID: 2027494986}
   m_Layer: 0
   m_Name: RosemaryCameraPivot
   m_TagString: Untagged
@@ -1250,6 +1299,28 @@ Transform:
   m_Father: {fileID: 441768044}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 40, y: 45, z: 0}
+--- !u!114 &2027494986
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2027494984}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 74e88aa87b7c1c14b9f32fb1709b49af, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inputAxisNameForSideways: Horizontal
+  invertForSideways: 0
+  sensitivityForSideways: 10
+  inputAxisnameForForwards: Vertical
+  invertForForwards: 0
+  sensitivityForForwards: 10
+  inputAxisNameForBoom: Mouse ScrollWheel
+  invertForBooom: 1
+  sensitivityForBoom: 0.5
+  m_pawn: {fileID: 2027494988}
 --- !u!114 &2027494988
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1262,8 +1333,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7ce5aac12655ec4a8795d187c8fca4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speedSideways: 50
-  speedForwards: 50
   verticalAxis: 0
   speedRelativeToBoom:
     serializedVersion: 2
@@ -1289,14 +1358,10 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  horizontal: Horizontal
-  vertical: Vertical
-  scroll: Mouse ScrollWheel
   bounds:
     m_Center: {x: 500, y: 0, z: 500}
     m_Extent: {x: 500, y: 0, z: 500}
-  boomNorm: 0.5
-  boomSensitivity: 0.5
+  m_boomNorm: 0.5
   boomCurve:
     serializedVersion: 2
     m_Curve:

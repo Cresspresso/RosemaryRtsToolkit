@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Cresspresso
 {
@@ -9,10 +10,18 @@ namespace Cresspresso
 	{
 		public class RosemaryUnit : MonoBehaviour
 		{
-			public GameObject selectedVisuals;
 			public Vector3 destination;
 			public float speed = 10;
-			public float rotateSpeed = 90;
+			public float angularSpeed = 90;
+
+			[SerializeField]
+			private UnityEvent m_onSelected = new UnityEvent();
+			public UnityEvent onSelected => m_onSelected;
+
+			[SerializeField]
+			private UnityEvent m_onDeselected = new UnityEvent();
+			public UnityEvent onDeselected => m_onDeselected;
+
 			private Quaternion orientation;
 
 			private void Awake()
@@ -32,23 +41,17 @@ namespace Cresspresso
 					orientation = Quaternion.LookRotation(displacement, up);
 				}
 
-				transform.rotation = Quaternion.RotateTowards(transform.rotation, orientation, rotateSpeed * Time.fixedDeltaTime);
+				transform.rotation = Quaternion.RotateTowards(transform.rotation, orientation, angularSpeed * Time.fixedDeltaTime);
 			}
 
 			public void OnSelected()
 			{
-				if (selectedVisuals)
-				{
-					selectedVisuals.SetActive(true);
-				}
+				m_onSelected.Invoke();
 			}
 
 			public void OnDeselected()
 			{
-				if (selectedVisuals)
-				{
-					selectedVisuals.SetActive(false);
-				}
+				m_onDeselected.Invoke();
 			}
 		}
 	}
