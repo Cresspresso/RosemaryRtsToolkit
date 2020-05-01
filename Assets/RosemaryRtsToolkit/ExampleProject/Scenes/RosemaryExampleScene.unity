@@ -507,7 +507,7 @@ MonoBehaviour:
   m_camera: {fileID: 0}
   terrainLayerMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 55
   selector: {fileID: 0}
 --- !u!1001 &472286983
 PrefabInstance:
